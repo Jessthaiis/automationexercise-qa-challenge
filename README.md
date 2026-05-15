@@ -286,6 +286,12 @@ ou
 
 ---
 
+### 🎥 Evidência - Cartão de Crédito
+
+![Validação cartão](./assets/validacao-cartao.gif)
+
+---
+
 ## 🔐 2. Exclusão de conta via API sem autenticação adequada
 
 ### 📌 Tipo
@@ -332,6 +338,14 @@ A API permite a exclusão da conta apenas com email e senha no body, sem autenti
 - Exposição do endpoint a uso indevido
 - Não conformidade com boas práticas de segurança (OWASP Top 10)
 - Risco direto à integridade dos dados dos usuários
+
+---
+
+### 🎥 Evidência - API Delete Account
+
+![Delete account](./assets/api-delete.gif)
+
+---
 
 ## 👩‍💻 Desenvolvido por
 
