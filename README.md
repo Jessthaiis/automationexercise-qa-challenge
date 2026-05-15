@@ -79,30 +79,63 @@ Para concluir a aquisição de produtos na plataforma
 ### ⚠️ 1. Double submit no pagamento
 
 **Objetivo:**  
-Validar o comportamento da aplicação ao receber múltiplos cliques no botão de confirmação da compra.
+Garantir que o sistema não permita a criação de pedidos duplicados ao realizar múltiplos cliques no botão de pagamento.
+
+**Cenário:**  
+- Usuário está na etapa de pagamento  
+- Possui dados de cartão válidos  
+- Clica repetidamente no botão "Pay and Confirm Order"
+
+**Resultado esperado:**  
+- Apenas um pedido deve ser criado  
+- O botão deve ser desabilitado durante o processamento  
+- Não deve haver duplicidade de pedidos  
 
 **Risco:**  
-Possível criação de pedidos duplicados e inconsistência financeira.
+Criação de pedidos duplicados e inconsistência no processamento do pedido.
 
 ---
 
 ### ⚠️ 2. Validação de dados inválidos no pagamento
 
 **Objetivo:**  
-Validar o tratamento de entradas inválidas nos campos financeiros (Card Number, CVC, Expiration).
+Garantir que o sistema valide corretamente os dados inseridos no cartão de crédito.
+
+**Cenário:**  
+- Usuário está na etapa de pagamento  
+- Insere caracteres inválidos nos campos do cartão:
+  - Card Number  
+  - CVC  
+  - Expiration Month  
+  - Expiration Year  
+- Tenta finalizar a compra  
+
+**Resultado esperado:**  
+- A compra não deve ser concluída  
+- O sistema deve exibir mensagens de validação nos campos inválidos  
 
 **Risco:**  
-Submissão de dados inconsistentes e falhas no fluxo de pagamento.
+Envio de dados inválidos e falhas no fluxo de pagamento.
 
 ---
 
 ### ⚠️ 3. Expiração de sessão durante checkout
 
 **Objetivo:**  
-Validar se os produtos do carrinho permanecem após expiração de sessão e reautenticação.
+Garantir a consistência do carrinho e do fluxo de checkout após expiração de sessão.
+
+**Cenário:**  
+- Usuário possui produtos no carrinho  
+- Inicia o processo de checkout  
+- A sessão expira durante a finalização da compra  
+
+**Resultado esperado:**  
+- Usuário deve ser redirecionado para a tela de login  
+- Itens do carrinho devem ser mantidos  
+- Usuário deve conseguir retomar o checkout após autenticação  
 
 **Risco:**  
-Perda de carrinho, abandono de compra e má experiência do usuário.
+Perda de carrinho, abandono de compra e impacto negativo na experiência do usuário.
 
 ---
 
@@ -198,6 +231,107 @@ cypress/
 - Uso de plugin para visualização das requisições
 
 ---
+
+# 🧪 QA Report - Defeitos e Melhorias Identificadas
+
+Este documento apresenta dois problemas identificados durante testes funcionais (UI) e de API, com análise de impacto, passos de reprodução e comportamento esperado conforme boas práticas de qualidade, segurança e validação de dados.
+
+---
+
+## 🐞 1. Validação inadequada em campos de cartão de crédito (input via colagem)
+
+### 📌 Tipo
+Bug de validação / Input validation
+
+---
+
+### 🧩 Descrição
+Na tela de pagamento, os campos de dados do cartão de crédito estão permitindo a inserção de caracteres especiais através do evento de colagem (*paste*). Isso indica ausência ou inconsistência de validação no input, permitindo entrada de dados inválidos em campos que deveriam aceitar apenas valores numéricos.
+
+---
+
+### 🔁 Fluxo para reproduzir
+1. Acessar a aplicação
+2. Adicionar um produto ao carrinho
+3. Acessar o carrinho de compras
+4. Prosseguir para checkout
+5. Realizar login ou criar uma nova conta
+6. Retornar ao carrinho (quando aplicável ao fluxo da aplicação)
+7. Prosseguir para a tela de pagamento
+8. Localizar os campos de cartão de crédito (número, CVV, validade)
+9. Copiar um valor contendo caracteres não numéricos (ex: `12@34#56`)
+10. Colar o valor no campo de entrada
+
+---
+
+### ❗ Resultado atual
+O sistema aceita caracteres especiais sem validação ou sanitização nos campos de cartão de crédito.
+
+---
+
+### ✅ Resultado esperado
+- Bloqueio de caracteres não numéricos no evento de entrada/colagem  
+ou  
+- Sanitização automática removendo caracteres inválidos  
+- Validação em tempo real antes da submissão do pagamento  
+- Exibição de mensagem de erro clara ao usuário  
+
+---
+
+### ⚠️ Impacto
+- Inconsistência de dados em informações financeiras
+- Possível falha na validação de pagamento
+- Impacto negativo na experiência do usuário no checkout
+- Falta de consistência entre validação de frontend e backend
+
+---
+
+## 🔐 2. Exclusão de conta via API sem autenticação adequada
+
+### 📌 Tipo
+Falha de segurança / Access control issue (Critical)
+
+---
+
+### 🧩 Descrição
+O endpoint de exclusão de conta permite a execução da operação via API utilizando apenas email e senha no corpo da requisição, sem exigir autenticação via token ou sessão. Isso indica fragilidade no controle de acesso e ausência de proteção adequada no endpoint.
+
+---
+
+### 🔁 Fluxo para reproduzir
+1. Abrir o Postman (ou ferramenta similar)
+2. Selecionar o método **DELETE**
+3. Inserir a URL: https://automationexercise.com/api/deleteAccount
+4. Ir até a aba **Body**
+5. Selecionar o formato:`Form URL Encoded`
+6. Inserir os parâmetros:
+- **email:** seu_email_cadastrado  
+- **password:** sua_senha  
+7. Clicar em **Send**
+8. Observar a resposta da API
+
+---
+
+### ❗ Resultado atual
+A API permite a exclusão da conta apenas com email e senha no body, sem autenticação via token ou mecanismo adicional de validação de sessão.
+
+---
+
+### ✅ Resultado esperado
+- Exigir autenticação válida (token/session/JWT)
+- Validar autorização antes da execução da operação
+- Retornar códigos apropriados:
+- `401 Unauthorized` → ausência de autenticação
+- `403 Forbidden` → usuário sem permissão
+
+---
+
+### ⚠️ Impacto
+- Vulnerabilidade crítica de segurança (Broken Access Control)
+- Possibilidade de automação de deleção de contas
+- Exposição do endpoint a uso indevido
+- Não conformidade com boas práticas de segurança (OWASP Top 10)
+- Risco direto à integridade dos dados dos usuários
 
 ## 👩‍💻 Desenvolvido por
 
