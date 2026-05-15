@@ -347,6 +347,24 @@ A API permite a exclusão da conta apenas com email e senha no body, sem autenti
 
 ---
 
+## 🧠 Decisões Técnicas
+
+- Cypress foi escolhido pela facilidade de manutenção, alta performance e comunidade ativa
+- Estrutura modular para facilitar escalabilidade e organização do projeto
+- Uso do padrão Page Objects para reutilização e melhor manutenção dos testes
+- Separação entre massa de dados e cenários de teste para maior legibilidade e flexibilidade
+
+---
+
+## 🚀 Melhorias Futuras
+
+- Integração com pipeline de CI/CD (GitHub Actions ou similar)
+- Implementação de relatórios automatizados de execução (ex: Mochawesome)
+- Execução cross-browser para maior cobertura de testes
+- Implementação de massa de dados dinâmica para cenários mais realistas
+
+---
+
 ## 👩‍💻 Desenvolvido por
 
 **Jessica Thaís Machado**
