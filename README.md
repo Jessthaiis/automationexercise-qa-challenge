@@ -350,4 +350,3 @@ A API permite a exclusão da conta apenas com email e senha no body, sem autenti
 ## 👩‍💻 Desenvolvido por
 
 **Jessica Thaís Machado**
-```
